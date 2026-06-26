@@ -1,0 +1,10 @@
+.ipynb_checkpoints/
+_site/*
+.idea/
+.sass-cache
+DS_Store
+.bundler/
+.vscode/
+_site/
+.DS_Store
+test/
