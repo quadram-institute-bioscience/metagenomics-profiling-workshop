@@ -1,0 +1,54 @@
+# basic configuration
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: "highlight"
+
+permalink: /:categories/:title/
+
+# Change this tracking code with your own tracking code
+ga_tracking_code: 
+# Please leave this code here for us to see how Course in a Box get used
+p2pu_ga_tracking_code: 
+
+# Some files we need to exclude, so Github can build the site
+exclude: [Gemfile, Gemfile.lock, README.md]
+
+github:
+  repository_url: https://github.com/quadram-institute-bioscience/metagenomics-profiling-workshop
+  source:
+    branch: gh-pages  # or 'master' if that's your default branch
+
+
+defaults:
+  -
+    scope:
+      path: "modules" # an empty string here means all files in the project
+    values:
+      layout: "course_page"
+
+prose:
+  media: img
+  ignore:
+    - /_includes
+    - /_layouts
+    - /_sass
+    - /fonts
+    - /js
+    - /css
+
+# Set some personal styles and logo for your course
+# this is a hex value http://www.w3schools.com/tags/ref_colorpicker.asp
+jumbotron_color: "#003F58"
+jumbotron_image: "img/jumbotron-image.svg"
+#jumbotron_mask: "img/jumbotron-mask.svg"
+jumbotron_icon: "img/box-icon.png"
+#green b2c720
+#darkblue 0077bb
+#lightblue 029fde
+
+
+plugins:
+  - jemoji
