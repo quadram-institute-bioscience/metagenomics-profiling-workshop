@@ -7,9 +7,7 @@ title: "Before we start"
 * Basic understanding of microbiology and microbial genomics
 * Knowledge of operating with the **Linux Command Line Interface (CLI)**, understanding the file paths and using common commands like `ls`, `cd`, `head`, `wc` ... See [Astrobiomike's tutorial](https://astrobiomike.github.io/unix/unix-intro)
 * Ability to install packages and **create/activate environments** using conda (or modern alternatives such as `mamba` or `micromamba`)
-
-* *Optional*: ability to write simple bash scripts, perform `for` loops, using Bash variables (like `$REFERENCE`). See [this short tutorial](https://telatin.github.io/microbiome-bioinformatics/Bash-tutorial-1/).
-
+ 
 
 ### Suggested readings
 
