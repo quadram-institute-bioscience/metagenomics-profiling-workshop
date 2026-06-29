@@ -6,7 +6,7 @@ title: "MetaPhlAn4 hands-on"
 ---
 
 > The Workshop material is available to download in 
-> [Figshare](https://figshare.com/articles/presentation/MMB_DTP_workshop_-_Introduction_to_taxonomic_profiling_of_metagenomes/30704492)
+> [Figshare]()
 
 ---
 
