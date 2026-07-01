@@ -77,7 +77,7 @@ metaphlan [FORWARD],[REVERSE] \
 You can test this command on a small subset of reads:
 
 ```bash
-metaphlan $WSUSER/small_subset/subset_R1.fq.gz,$WSUSER/small_subset/subset_R1.fq.gz \
+metaphlan $WSUSER/small_subset/subset_R1.fq.gz,$WSUSER/small_subset/subset_R2.fq.gz \
     --input_type fastq \
     --offline \
     --nproc 6 \
@@ -148,7 +148,7 @@ library(tidyverse)
 ```r
 MPA_DIR="/shared/team/datasets/day2/1.metaphlan4_precomputed"
 
-profile_no_uncl <- read_tsv(paste(MPA_DIR, "ERR2231567.profile.txt", sep="/"), 
+profile_no_uncl <- read_tsv(paste(MPA_DIR, "T0_ERR2231567.profile.txt", sep="/"), 
                     skip = 4,
                     show_col_types = FALSE) %>%
         rename("clade_name"=`#clade_name`)
@@ -161,7 +161,7 @@ profile_no_uncl <- read_tsv(paste(MPA_DIR, "ERR2231567.profile.txt", sep="/"),
 ```r
 MPA_DIR="/shared/team/datasets/day2/1.metaphlan4_precomputed"
 # Read profile WITH unclassified
-profile_uncl <- read_tsv(paste(MPA_DIR, "ERR2231567.unclprofile.txt", sep="/"), 
+profile_uncl <- read_tsv(paste(MPA_DIR, "T0_ERR2231567.unclprofile.txt", sep="/"), 
                          skip = 4,
                     show_col_types = FALSE) %>%
         rename("clade_name"=`#clade_name`)

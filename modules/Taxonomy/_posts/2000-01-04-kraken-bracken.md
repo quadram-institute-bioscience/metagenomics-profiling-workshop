@@ -125,7 +125,7 @@ Make sure you have:
 ```bash
 conda deactivate
 
-conda activate /shared/team/conda/aliseponsero.mmb-dtp/kraken2
+conda activate /shared/team/conda/aliseponsero.cli-giba-2026/kraken2/
 ```
 
 - RStudio access on the notebook

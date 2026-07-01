@@ -28,7 +28,7 @@ Kraken2 requires a pre-built database. For this workshop, we're using the **stan
 
 **To explore:**
 ```bash
-ls -lh /shared/team/2025_training/week5/databases/kraken2/
+ls -lh /shared/public/db/kraken2/pluspf_8gb/
 ```
 
 ### Available Pre-built Databases
@@ -54,7 +54,7 @@ Kraken2 offers many pre-built database options (see https://benlangmead.github.i
 
 ```bash
 conda deactivate  # If you were in metaphlan environment
-conda activate /shared/team/conda/aliseponsero.mmb-dtp/kraken2
+conda activate /shared/team/conda/aliseponsero.cli-giba-2026/kraken2/
 ```
 
 ### Step 2: Check Installation
@@ -88,6 +88,18 @@ kraken2 --db [DATABASE_PATH] \
     --paired [FORWARD] [REVERSE]
 ```
 
+You can test this command on a small subset of reads:
+
+```bash
+DB="/shared/public/db/kraken2/pluspf_8gb"
+
+kraken2 --db $DB \
+    --threads 6 \
+    --report  $WSUSER/test_Kraken2_report.txt \
+    --output  $WSUSER/test_Kraken2.txt \
+    --paired $WSUSER/small_subset/subset_R1.fq.gz $WSUSER/small_subset/subset_R2.fq.gz
+```
+
 💡 **Tip:** The `--output` file is very large (one line per read). For most analyses, you only need the `--report` file.
 
 **This would normally take 5-15 minutes, but we'll look at precomputed results.**
@@ -99,7 +111,7 @@ kraken2 --db [DATABASE_PATH] \
 
 ### Kraken2 Report Format
 
-Open a Kraken precomputed output (e.g. T0_ERR2231567_profiles.txt)
+Open a Kraken precomputed output (e.g. ERR2231567_profiles.txt)
 
 The report file is tab-delimited with 6 columns:
 
@@ -154,7 +166,7 @@ bracken -v
 Bracken databases are built for specific read lengths. Check what's available:
 
 ```bash
-ls /shared/team/2025_training/week5/databases/kraken2/database*mers.kmer_distrib
+ls /shared/public/db/kraken2/pluspf_8gb/database*mers.kmer_distrib
 ```
 
 You should see files like:
@@ -193,11 +205,11 @@ bracken -d [DATABASE_PATH] \
 **Example command:**
 ```bash
 mkdir test_bracken
-
-bracken -d /shared/team/2025_training/week5/databases/kraken2 \
-    -i Session1_profiling/Kraken2/T0_ERR2231567_profiles.txt \
-    -o test_bracken/subset_bracken_species.txt \
-    -w test_bracken/subset_bracken_species.report \
+    --report  $WSUSER/test_Kraken2_report.txt \
+    --output  $WSUSER/test_Kraken2.txt \
+bracken -d /shared/public/db/kraken2/pluspf_8gb \
+    -i $WSUSER/test_Kraken2_report.txt \
+    -o $WSUSER/test_bracken_report.txt \
     -r 150 \
     -l S \
     -t 10
@@ -239,27 +251,44 @@ Open RStudio on your notebook and follow along!
 library(tidyverse)
 ```
 
-### Read Bracken Output
+# Read the Bracken output for sample ERR2231567
 
 ```r
-# Read the Bracken output
-MYDIR="/shared/team/users/{your_name}/"
-
-bracken <- read_tsv(paste(MYDIR, "Session1_profiling/Bracken/T0_ERR2231567_profiles.txt", sep="/"),
+BRA_DIR="/shared/team/datasets/day2/2.Kraken2_precomputed/2.Bracken"
+bracken <- read_tsv(paste(BRA_DIR, "T0_ERR2231567_profiles.txt", sep="/"),
                     show_col_types = FALSE)
+```
 
+### Visualize Bracken Results
+
+```r
+bracken_rel <- bracken %>% filter(fraction_total_reads>0) %>%
+    mutate(relative_abundance=fraction_total_reads*100) %>%
+    arrange(desc(relative_abundance))
+
+bracken_grouped <- bracken_rel %>%
+    mutate(species_name=ifelse(relative_abundance<3, "Other", name)) %>%
+    group_by(species_name) %>%
+    summarize(relative_abundance=sum(relative_abundance)) %>%
+    select(species_name, relative_abundance)
+
+bracken_grouped %>%
+  mutate(sample="T0") %>%
+  ggplot(aes(x = sample, y = relative_abundance, fill=species_name)) +
+  geom_bar(stat="identity") +
+  coord_flip() +
+  labs(title = "Species composition at T0",
+       x = "Species",
+       y = "Relative Abundance (%)") +
+  theme_minimal()
 ```
 
 ### Compare Bracken to MetaPhlAn4:
 
 ```r
-# Subset Bracken species
-bracken_rel <- bracken %>% filter(fraction_total_reads>0) %>%
-    mutate(relative_abundance=fraction_total_reads*100) %>%
-    arrange(desc(relative_abundance))
-
 # Get MetaPhlAn4 species
-profile_no_uncl <- read_tsv(paste(MYDIR, "Session1_profiling/Metaphlan/T0_ERR2231567.profile.txt", sep="/"), 
+MPA_DIR="/shared/team/datasets/day2/1.metaphlan4_precomputed"
+profile_no_uncl <- read_tsv(paste(MPA_DIR, "ERR2231567.profile.txt", sep="/"), 
                     skip = 4,
                     show_col_types = FALSE) %>%
         rename("clade_name"=`#clade_name`)
@@ -289,28 +318,6 @@ comparison <- tibble(
 )
 
 print(comparison)
-```
-
-
-### Visualize Bracken Results
-
-```r
-bracken_grouped <- bracken_rel %>%
-    mutate(species_name=ifelse(relative_abundance<5, "Other", name)) %>%
-    group_by(species_name) %>%
-    summarize(relative_abundance=sum(relative_abundance)) %>%
-    select(species_name, relative_abundance)
-
-
-bracken_grouped %>%
-  mutate(sample="T0") %>%
-  ggplot(aes(x = sample, y = relative_abundance, fill=species_name)) +
-  geom_bar(stat="identity") +
-  coord_flip() +
-  labs(title = "Species composition at T0",
-       x = "Species",
-       y = "Relative Abundance (%)") +
-  theme_minimal()
 ```
 
 ---
