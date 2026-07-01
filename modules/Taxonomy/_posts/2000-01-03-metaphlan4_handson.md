@@ -16,7 +16,7 @@ title: "MetaPhlAn4 hands-on"
 
 MetaPhlAn4 requires a pre-built database of marker genes. For this workshop, the database is located at:
 
-```
+```bash
 /shared/team/conda/telatin.cli-giba-2026/mpa/lib/python3.13/site-packages/metaphlan/metaphlan_databases
 ```
 
@@ -135,9 +135,6 @@ We will need to first install the packages we will use in this session
 
 ```r
 install.packages("tidyverse")
-
-if (!require(remotes)) { install.packages("remotes") }
-remotes::install_github("fbreitwieser/pavian")
 ```
 
 ### Load Required Libraries

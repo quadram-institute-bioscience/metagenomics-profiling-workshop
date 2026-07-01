@@ -313,7 +313,6 @@ bracken_grouped %>%
   theme_minimal()
 ```
 
-
 ---
 
 ## Additional Resources
