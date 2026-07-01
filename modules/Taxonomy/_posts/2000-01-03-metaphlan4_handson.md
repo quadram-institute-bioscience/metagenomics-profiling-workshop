@@ -17,7 +17,7 @@ title: "MetaPhlAn4 hands-on"
 MetaPhlAn4 requires a pre-built database of marker genes. For this workshop, the database is located at:
 
 ```
-/shared/team/2025_training/week5/databases/metaphlan/
+/shared/team/conda/telatin.cli-giba-2026/mpa/lib/python3.13/site-packages/metaphlan/metaphlan_databases
 ```
 
 **Key files in the database:**
@@ -27,7 +27,7 @@ MetaPhlAn4 requires a pre-built database of marker genes. For this workshop, the
 
 **To explore:**
 ```bash
-ls -lh /shared/team/2025_training/week5/databases/metaphlan/
+ls -lh /shared/team/conda/telatin.cli-giba-2026/mpa/lib/python3.13/site-packages/metaphlan/metaphlan_databases
 ```
 
 ## Part 2: Running MetaPhlAn4
@@ -35,7 +35,7 @@ ls -lh /shared/team/2025_training/week5/databases/metaphlan/
 ### Step 1: Activate the Environment
 
 ```bash
-conda activate /shared/team/conda/aliseponsero.mmb-dtp/metaphlan
+conda activate /shared/team/conda/telatin.cli-giba-2026/mpa
 ```
 
 ### Step 2: Check Installation
@@ -53,7 +53,7 @@ metaphlan --help
 **Key parameters to understand:**
 - Input files (paired-end: comma-separated, no space!)
 - `--input_type fastq` - Specifies input format
-- `--db_dir` - Path to database directory
+- `--db_dir` - Path to database directory -- default location if omitted
 - `--offline` - Don't check for database updates
 - `--nproc` - Number of processors to use
 - `-o` or `--output_file` - Path to output file
@@ -68,13 +68,22 @@ For paired-end reads, MetaPhlAn4 requires input files separated by a comma with 
 ```bash
 metaphlan [FORWARD],[REVERSE] \
     --input_type fastq \
-    --db_dir [DATABASE_PATH] \
     --offline \
     --nproc [N] \
     -o [OUTPUT] \
     --mapout [MAPPING_OUTPUT]
 ```
 
+You can test this command on a small subset of reads:
+
+```bash
+metaphlan $WSUSER/small_subset/subset_R1.fq.gz,$WSUSER/small_subset/subset_R1.fq.gz \
+    --input_type fastq \
+    --offline \
+    --nproc 6 \
+    -o $WSUSER/test_mpa.txt \
+    --mapout $WSUSER/test_mpa.bt2
+```
 ⏱️ **Runtime:** 5-10 minutes for the subset sample --> We will use precomputed results
 
 💡 **Tip:** The `--mapout` file can be reused to re-run MetaPhlAn4 with different parameters without re-mapping reads!
@@ -140,21 +149,22 @@ library(tidyverse)
 ### Read the MetaPhlAn4 Profile
 
 ```r
-# Read a precomputed profile
-MYDIR="/shared/team/users/{your_name}/"
+MPA_DIR="/shared/team/datasets/day2/1.metaphlan4_precomputed"
 
-profile_no_uncl <- read_tsv(paste(MYDIR, "Session1_profiling/Metaphlan/T0_ERR2231567.profile.txt", sep="/"), 
+profile_no_uncl <- read_tsv(paste(MPA_DIR, "ERR2231567.profile.txt", sep="/"), 
                     skip = 4,
                     show_col_types = FALSE) %>%
         rename("clade_name"=`#clade_name`)
+
 
 ```
 
 ### Compare Profiles With/Without Unclassified Estimation
 
 ```r
+MPA_DIR="/shared/team/datasets/day2/1.metaphlan4_precomputed"
 # Read profile WITH unclassified
-profile_uncl <- read_tsv(paste(MYDIR, "Session1_profiling/Metaphlan/T0_ERR2231567.unclprofile.txt", sep="/"), 
+profile_uncl <- read_tsv(paste(MPA_DIR, "ERR2231567.unclprofile.txt", sep="/"), 
                          skip = 4,
                     show_col_types = FALSE) %>%
         rename("clade_name"=`#clade_name`)
@@ -162,7 +172,7 @@ profile_uncl <- read_tsv(paste(MYDIR, "Session1_profiling/Metaphlan/T0_ERR223156
 # Check for UNCLASSIFIED entry
 profile_uncl %>%
   filter(clade_name=="UNCLASSIFIED")
-
+  
 # Compare first few rows
 profile_uncl %>% head(5)
 profile_no_uncl %>% head(5)
