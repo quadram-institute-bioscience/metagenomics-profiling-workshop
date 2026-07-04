@@ -17,7 +17,7 @@ title: "Kraken2 & Bracken hands-on"
 Kraken2 requires a pre-built database. For this workshop, we're using the **standard_8gb** database located at:
 
 ```
-/shared/team/2025_training/week5/databases/kraken2/
+/shared/public/db/kraken2/pluspf_8gb/
 ```
 
 **Key files in the database:**
@@ -28,7 +28,7 @@ Kraken2 requires a pre-built database. For this workshop, we're using the **stan
 
 **To explore:**
 ```bash
-ls -lh /shared/public/db/kraken2/pluspf_8gb/
+ls -lh /shared/public/db/kraken2/pluspf_8gb/2026-02-26
 ```
 
 ### Available Pre-built Databases
@@ -91,7 +91,7 @@ kraken2 --db [DATABASE_PATH] \
 You can test this command on a small subset of reads:
 
 ```bash
-DB="/shared/public/db/kraken2/pluspf_8gb"
+DB="/shared/public/db/kraken2/pluspf_8gb/2026-02-26"
 
 kraken2 --db $DB \
     --threads 6 \

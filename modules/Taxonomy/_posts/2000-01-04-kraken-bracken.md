@@ -121,13 +121,13 @@ Make sure you have:
 - Access to the workshop notebook
 - Data symlinked/copied to your workspace
 - Kraken2 conda environment available
+- RStudio access on the notebook
+
 
 ```bash
 conda deactivate
 
 conda activate /shared/team/conda/aliseponsero.cli-giba-2026/kraken2/
 ```
-
-- RStudio access on the notebook
 
 
