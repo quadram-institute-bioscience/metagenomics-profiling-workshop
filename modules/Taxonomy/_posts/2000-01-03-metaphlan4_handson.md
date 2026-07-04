@@ -6,7 +6,7 @@ title: "MetaPhlAn4 hands-on"
 ---
 
 > The Workshop material is available to download in 
-> [Figshare]()
+> [Figshare](https://doi.org/10.6084/m9.figshare.32900546)
 
 ---
 

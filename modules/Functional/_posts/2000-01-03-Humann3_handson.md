@@ -7,7 +7,7 @@ title: "Humann3 Hands-on"
 ---
 
 > The Workshop material for this hands-on is available to download in 
-> [Figshare]()
+> [Figshare](https://doi.org/10.6084/m9.figshare.32900546)
 
 
 ## Hands-On: Exploring Coffee Fermentation Functional Profiles
@@ -46,8 +46,6 @@ cp -r  /shared/team/datasets/day2/3.Humann3_precomputed $WSUSER
 ## Exploring HUMAnN3 Results in R
 
 ### Open RStudio and Load the Script
-
-**[Link to R Markdown: HUMAnN3 Pathway Exploration](explore_humann3.Rmd)**
 
 Open RStudio and open the `Session3_humann3.Rmd` file.
 

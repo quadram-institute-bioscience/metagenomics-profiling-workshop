@@ -6,7 +6,7 @@ title: "Kraken2 & Bracken hands-on"
 ---
 
 > The Workshop materials are available to download in
-> [Figshare]()
+> [Figshare](https://doi.org/10.6084/m9.figshare.32900546)
 
 ---
 
