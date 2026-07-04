@@ -16,16 +16,16 @@ title: "Humann3 Hands-on"
 
 Make sure you have:
 - Access to the climb shared project
-- Data symlinked / copied to your workspace
+- Data copied to your workspace
 
 ```bash
 export WSUSER=/shared/team/users/{your_name}/
 cd $WSUSER
+```
 
 # Link to precomputed HUMAnN3 results
-ln -s /shared/team/2025_training/week5/tutorial/Session3_Functional/Single_sample .
-
-ls -lh func_precomputed/humann3/
+```bash
+cp -r  /shared/team/datasets/day2/3.Humann3_precomputed $WSUSER
 ```
 
 - RStudio access on the notebook
@@ -48,13 +48,6 @@ ls -lh func_precomputed/humann3/
 ### Open RStudio and Load the Script
 
 **[Link to R Markdown: HUMAnN3 Pathway Exploration](explore_humann3.Rmd)**
-
-Copy the script to your workspace:
-
-```bash
-cd $WSUSER
-cp /shared/team/2025_training/week5/tutorial/Session3_Functional/Single_sample/Session3_humann3.Rmd .
-```
 
 Open RStudio and open the `Session3_humann3.Rmd` file.
 
