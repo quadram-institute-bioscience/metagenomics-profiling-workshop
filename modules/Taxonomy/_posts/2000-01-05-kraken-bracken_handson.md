@@ -1,134 +1,12 @@
 ---
-title: "Kraken2 & Bracken"
+title: "Kraken2 & Bracken hands-on"
 ---
 # Kraken2 & Bracken: K-mer Based Taxonomic Classification
 
 ---
 
-> The Workshop materia;ls available to download 
-> [Figshare](https://figshare.com/articles/presentation/MMB_DTP_workshop_-_Introduction_to_taxonomic_profiling_of_metagenomes/30704492)
-
-## Theory Overview
-
-### What is Kraken2?
-
-**Kraken2** is an ultrafast taxonomic classification system that uses exact k-mer matching to assign taxonomic labels to metagenomic DNA sequences.
-
-**Key Features:**
-- **K-mer based** classification (exact matching of short DNA sequences)
-- **Extremely fast** - can process millions of reads per minute
-- **High sensitivity** - detects more taxa than marker-based methods
-- Reports **read counts** at all taxonomic levels
-- Uses **LCA (Lowest Common Ancestor)** algorithm for ambiguous k-mers
-
-### How Does Kraken2 Work?
-
-1. **Database Construction**
-   - K-mers (default: 35bp) extracted from reference genomes
-   - Each k-mer mapped to the lowest taxonomic level where it appears
-   - Database contains bacteria, archaea, viruses, plasmids, and optionally fungi, protozoa, plants
-
-2. **Classification Step**
-   - Each read broken into k-mers
-   - K-mers queried against database
-   - LCA algorithm determines the most specific taxonomic assignment
-   - Confidence score calculated based on k-mer agreement
-
-3. **Output**
-   - Per-read classifications (which taxon each read belongs to)
-   - Summary report with read counts at each taxonomic level
-
-### Kraken2 Modes
-
-**Standard mode:** Examines all k-mers in a read  
-**Quick mode (`--quick`):** Stops after first k-mer hit - much faster, slightly less accurate
-
-### Advantages
-
-✅ **Very fast** - Processes samples in minutes  
-✅ **High sensitivity** - Detects more taxa, including rare ones  
-✅ **Low unclassified rate** - Classifies more reads than MetaPhlAn4  
-✅ **Comprehensive** - Reports all taxonomic levels  
-✅ **Flexible databases** - Many pre-built options available  
-
-### Limitations
-
-⚠️ **Higher false positive rate** - Especially for low-abundance taxa  
-⚠️ **Reports read counts** - Not normalized for genome size  
-⚠️ **High memory usage** - Full databases require a good amount RAM (to run on the HPC)
-⚠️ **Many reads at higher levels** - Reads classified to genus/family rather than species  
-
----
-
-## What is Bracken?
-
-### The Problem Kraken2 Doesn't Solve
-
-Kraken2 is very good at **classifying reads**, but has a problem:
-- Many reads are classified at **higher taxonomic levels** (genus, family, order)
-- This happens when k-mers are shared across multiple species
-- We want **species-level abundances** for most analyses
-
-### Bracken's Solution
-
-**Bracken** (Bayesian Reestimation of Abundance with KrakEN) uses a probabilistic approach to:
-- **Redistribute** reads from higher levels down to species
-- Use expected k-mer distributions to estimate the true species of origin
-- Produce more accurate **species-level abundance estimates**
-
-### How Bracken Works
-
-1. **Pre-computation** (already done for workshop databases)
-   - For each species in database, simulate reads of length X (e.g., 150bp)
-   - Classify simulated reads with Kraken2
-   - Calculate: "What % of this species' reads get classified to genus vs species?"
-
-2. **Re-estimation** (what you run)
-   - Takes Kraken2 report as input
-   - Uses Bayesian inference to redistribute higher-level reads
-   - Filters out low-confidence species (below threshold)
-   - Outputs species-level abundance estimates
-
-### Bracken Advantages
-
-✅ **Better species-level estimates** than raw Kraken2  
-✅ **Reduces false positives** through thresholding  
-✅ **Fast** - runs in seconds  
-✅ **Conservative** - filters out poorly supported assignments  
-
-### Important Note
-
-⚠️ Bracken still reports **READ COUNTS**, not genome-size-normalized abundances  
-⚠️ For relative abundances, you need to convert: `(reads / total_reads) × 100`
-
----
-
-## When to Use Kraken2 + Bracken?
-
-- When you need **comprehensive detection** of all taxa
-- For **novel or diverse environments** where sensitivity matters
-- When you want to **minimize unclassified reads**
-- For **rapid screening** of many samples
-- When combined with Bracken, provides **balanced specificity and sensitivity**
-
----
-
-## Hands-On: Running Kraken2 and Bracken
-
-### Prerequisites
-
-Make sure you have:
-- Access to the workshop notebook
-- Data symlinked/copied to your workspace
-- Kraken2 conda environment available
-
-```bash
-conda deactivate
-
-conda activate /shared/team/conda/aliseponsero.mmb-dtp/kraken2
-```
-
-- RStudio access on the notebook
+> The Workshop materials are available to download in
+> [Figshare](https://doi.org/10.6084/m9.figshare.32900546)
 
 ---
 
@@ -139,7 +17,7 @@ conda activate /shared/team/conda/aliseponsero.mmb-dtp/kraken2
 Kraken2 requires a pre-built database. For this workshop, we're using the **standard_8gb** database located at:
 
 ```
-/shared/team/2025_training/week5/databases/kraken2/
+/shared/public/db/kraken2/pluspf_8gb/
 ```
 
 **Key files in the database:**
@@ -150,7 +28,7 @@ Kraken2 requires a pre-built database. For this workshop, we're using the **stan
 
 **To explore:**
 ```bash
-ls -lh /shared/team/2025_training/week5/databases/kraken2/
+ls -lh /shared/public/db/kraken2/pluspf_8gb/2026-02-26
 ```
 
 ### Available Pre-built Databases
@@ -176,7 +54,7 @@ Kraken2 offers many pre-built database options (see https://benlangmead.github.i
 
 ```bash
 conda deactivate  # If you were in metaphlan environment
-conda activate /shared/team/conda/aliseponsero.mmb-dtp/kraken2
+conda activate /shared/team/conda/aliseponsero.cli-giba-2026/kraken2/
 ```
 
 ### Step 2: Check Installation
@@ -210,6 +88,18 @@ kraken2 --db [DATABASE_PATH] \
     --paired [FORWARD] [REVERSE]
 ```
 
+You can test this command on a small subset of reads:
+
+```bash
+DB="/shared/public/db/kraken2/pluspf_8gb/2026-02-26"
+
+kraken2 --db $DB \
+    --threads 6 \
+    --report  $WSUSER/test_Kraken2_report.txt \
+    --output  $WSUSER/test_Kraken2.txt \
+    --paired $WSUSER/small_subset/subset_R1.fq.gz $WSUSER/small_subset/subset_R2.fq.gz
+```
+
 💡 **Tip:** The `--output` file is very large (one line per read). For most analyses, you only need the `--report` file.
 
 **This would normally take 5-15 minutes, but we'll look at precomputed results.**
@@ -221,7 +111,7 @@ kraken2 --db [DATABASE_PATH] \
 
 ### Kraken2 Report Format
 
-Open a Kraken precomputed output (e.g. T0_ERR2231567_profiles.txt)
+Open a Kraken precomputed output (e.g. ERR2231567_profiles.txt)
 
 The report file is tab-delimited with 6 columns:
 
@@ -276,7 +166,7 @@ bracken -v
 Bracken databases are built for specific read lengths. Check what's available:
 
 ```bash
-ls /shared/team/2025_training/week5/databases/kraken2/database*mers.kmer_distrib
+ls /shared/public/db/kraken2/pluspf_8gb/database*mers.kmer_distrib
 ```
 
 You should see files like:
@@ -315,11 +205,11 @@ bracken -d [DATABASE_PATH] \
 **Example command:**
 ```bash
 mkdir test_bracken
-
-bracken -d /shared/team/2025_training/week5/databases/kraken2 \
-    -i Session1_profiling/Kraken2/T0_ERR2231567_profiles.txt \
-    -o test_bracken/subset_bracken_species.txt \
-    -w test_bracken/subset_bracken_species.report \
+    --report  $WSUSER/test_Kraken2_report.txt \
+    --output  $WSUSER/test_Kraken2.txt \
+bracken -d /shared/public/db/kraken2/pluspf_8gb \
+    -i $WSUSER/test_Kraken2_report.txt \
+    -o $WSUSER/test_bracken_report.txt \
     -r 150 \
     -l S \
     -t 10
@@ -361,27 +251,44 @@ Open RStudio on your notebook and follow along!
 library(tidyverse)
 ```
 
-### Read Bracken Output
+# Read the Bracken output for sample ERR2231567
 
 ```r
-# Read the Bracken output
-MYDIR="/shared/team/users/{your_name}/"
-
-bracken <- read_tsv(paste(MYDIR, "Session1_profiling/Bracken/T0_ERR2231567_profiles.txt", sep="/"),
+BRA_DIR="/shared/team/datasets/day2/2.Kraken2_precomputed/2.Bracken"
+bracken <- read_tsv(paste(BRA_DIR, "T0_ERR2231567_profiles.txt", sep="/"),
                     show_col_types = FALSE)
+```
 
+### Visualize Bracken Results
+
+```r
+bracken_rel <- bracken %>% filter(fraction_total_reads>0) %>%
+    mutate(relative_abundance=fraction_total_reads*100) %>%
+    arrange(desc(relative_abundance))
+
+bracken_grouped <- bracken_rel %>%
+    mutate(species_name=ifelse(relative_abundance<3, "Other", name)) %>%
+    group_by(species_name) %>%
+    summarize(relative_abundance=sum(relative_abundance)) %>%
+    select(species_name, relative_abundance)
+
+bracken_grouped %>%
+  mutate(sample="T0") %>%
+  ggplot(aes(x = sample, y = relative_abundance, fill=species_name)) +
+  geom_bar(stat="identity") +
+  coord_flip() +
+  labs(title = "Species composition at T0",
+       x = "Species",
+       y = "Relative Abundance (%)") +
+  theme_minimal()
 ```
 
 ### Compare Bracken to MetaPhlAn4:
 
 ```r
-# Subset Bracken species
-bracken_rel <- bracken %>% filter(fraction_total_reads>0) %>%
-    mutate(relative_abundance=fraction_total_reads*100) %>%
-    arrange(desc(relative_abundance))
-
 # Get MetaPhlAn4 species
-profile_no_uncl <- read_tsv(paste(MYDIR, "Session1_profiling/Metaphlan/T0_ERR2231567.profile.txt", sep="/"), 
+MPA_DIR="/shared/team/datasets/day2/1.metaphlan4_precomputed"
+profile_no_uncl <- read_tsv(paste(MPA_DIR, "ERR2231567.profile.txt", sep="/"), 
                     skip = 4,
                     show_col_types = FALSE) %>%
         rename("clade_name"=`#clade_name`)
@@ -413,29 +320,6 @@ comparison <- tibble(
 print(comparison)
 ```
 
-
-### Visualize Bracken Results
-
-```r
-bracken_grouped <- bracken_rel %>%
-    mutate(species_name=ifelse(relative_abundance<5, "Other", name)) %>%
-    group_by(species_name) %>%
-    summarize(relative_abundance=sum(relative_abundance)) %>%
-    select(species_name, relative_abundance)
-
-
-bracken_grouped %>%
-  mutate(sample="T0") %>%
-  ggplot(aes(x = sample, y = relative_abundance, fill=species_name)) +
-  geom_bar(stat="identity") +
-  coord_flip() +
-  labs(title = "Species composition at T0",
-       x = "Species",
-       y = "Relative Abundance (%)") +
-  theme_minimal()
-```
-
-
 ---
 
 ## Additional Resources
@@ -454,3 +338,4 @@ bracken_grouped %>%
 📖 **KrakenTools:** https://github.com/jenniferlu717/KrakenTools (for manipulating Kraken2/Bracken outputs)
 
 ---
+

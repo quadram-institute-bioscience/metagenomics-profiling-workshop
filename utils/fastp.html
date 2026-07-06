@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fastp command builder</title>
+<style>
+:root{
+  --bg:#f6f7f7; --panel:#ffffff; --ink:#25313a; --muted:#66737c; --line:#d9dedf;
+  --accent:#097E74; --accent2:#B6BE00; --warn:#b26a00; --bad:#b42318; --good:#087443;
+  --code:#18242b;
+}
+*{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+header{padding:28px 32px 18px;background:linear-gradient(135deg,#fff,#eef4f3);border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:30px;letter-spacing:-.03em} .sub{max-width:880px;color:var(--muted);margin-top:8px;font-size:15px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:22px;padding:22px;max-width:1500px;margin:auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(31,45,52,.06);overflow:hidden}
+.tabs{display:flex;gap:4px;padding:10px;background:#eef1f1;border-bottom:1px solid var(--line);flex-wrap:wrap}.tab{border:0;background:transparent;padding:10px 13px;border-radius:11px;color:#4d5b63;font-weight:650;cursor:pointer}.tab.active{background:#fff;color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+section.tabpanel{display:none;padding:22px}.tabpanel.active{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.full{grid-column:1/-1}
+fieldset{border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 16px}legend{padding:0 7px;font-weight:750;color:#33424a}.field{margin-bottom:14px}label{display:block;font-weight:700;margin-bottom:5px}.help{font-size:13px;color:var(--muted);margin-top:4px}input,select{width:100%;border:1px solid #c9d0d2;border-radius:10px;padding:10px 11px;font-size:14px;background:#fff;color:var(--ink)}input[type="checkbox"]{width:auto;margin-right:8px;transform:translateY(1px)}.check{display:flex;align-items:flex-start;gap:6px;margin:10px 0}.check label{font-weight:650;margin:0}.inline{display:grid;grid-template-columns:140px 1fr;gap:10px;align-items:center}.pill{display:inline-block;background:#eef8f6;color:var(--accent);padding:2px 8px;border-radius:99px;font-size:12px;font-weight:750;margin-left:4px}
+.side{position:sticky;top:14px;align-self:start}.side .inner{padding:18px}.status{border-radius:12px;padding:11px 12px;margin:10px 0;font-size:14px}.ok{background:#ecfdf3;color:var(--good);border:1px solid #abdcc0}.err{background:#fff0ee;color:var(--bad);border:1px solid #f0b7af}.warn{background:#fff8e8;color:var(--warn);border:1px solid #f0d394}.hint{background:#eff6ff;color:#24527a;border:1px solid #c6ddf5}
+pre{background:var(--code);color:#f4fbfb;border-radius:14px;padding:15px;white-space:pre-wrap;word-break:break-word;font-size:14px;min-height:118px}button.copy{background:var(--accent);color:white;border:0;border-radius:11px;padding:10px 14px;font-weight:750;cursor:pointer}button.secondary{background:#eef1f1;color:#33424a;border:1px solid var(--line);border-radius:11px;padding:10px 14px;font-weight:750;cursor:pointer}.row{display:flex;gap:8px;flex-wrap:wrap}.small{font-size:12px;color:var(--muted)}
+@media (max-width:980px){.layout{grid-template-columns:1fr;padding:14px}.side{position:static}.grid{grid-template-columns:1fr}header{padding:24px 18px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>fastp command builder</h1>
+  <div class="sub">Build a valid <code>fastp</code> command for single-end, paired-end, interleaved, streaming, adapter trimming, quality filtering, trimming, UMI processing, reporting, splitting and threading. The checks below catch common inconsistencies before you run the command.</div>
+</header>
+<main class="layout">
+<div class="card">
+  <nav class="tabs" id="tabs"></nav>
+
+  <section class="tabpanel active" data-title="Input">
+    <fieldset><legend>Input mode</legend>
+      <div class="field"><label>Read layout <span class="pill">required</span></label><select id="layout">
+        <option value="se">Single-end: one FASTQ input</option><option value="pe">Paired-end: R1 and R2 files</option><option value="interleaved">Paired-end interleaved input</option><option value="stdin_se">STDIN single-end stream</option><option value="stdin_interleaved">STDIN interleaved paired-end stream</option>
+      </select><div class="help">Choose how reads enter fastp. Paired-end mode requires both R1 and R2 unless using interleaved input or STDIN.</div></div>
+      <div class="grid">
+        <div class="field sefile pefile intfile"><label>Read 1 input: <code>-i/--in1</code></label><input id="in1" placeholder="sample_R1.fastq.gz"><div class="help">FASTQ file for single-end reads or read 1 of a pair. For interleaved file input, this is the interleaved FASTQ.</div></div>
+        <div class="field peonly"><label>Read 2 input: <code>-I/--in2</code></label><input id="in2" placeholder="sample_R2.fastq.gz"><div class="help">Required only for paired-end input using separate R1/R2 files.</div></div>
+      </div>
+      <div class="check"><input type="checkbox" id="phred64"><label for="phred64">Input uses Phred+64 quality scores: <code>-6/--phred64</code><div class="help">fastp converts Phred+64 input to Phred+33 output. Most modern Illumina data should leave this off.</div></label></div>
+      <div class="check"><input type="checkbox" id="fix_mgi_id"><label for="fix_mgi_id">Fix MGI read IDs: <code>--fix_mgi_id</code><div class="help">Use when MGI FASTQ identifiers cause compatibility problems with BAM/SAM tools.</div></label></div>
+      <div class="field"><label>Process only first N reads/pairs: <code>--reads_to_process</code></label><input type="number" id="reads_to_process" min="0" value="0"><div class="help">0 means process all reads. Useful for quick previews or small test subsets.</div></div>
+    </fieldset>
+  </section>
+
+  <section class="tabpanel" data-title="Output">
+    <fieldset><legend>Output destination</legend>
+      <div class="field"><label>Output mode</label><select id="outmode"><option value="files">Write output FASTQ file(s)</option><option value="stdout">Stream passing reads to STDOUT</option><option value="qc_only">QC only, do not write cleaned FASTQ</option></select><div class="help">For paired-end data, <code>--stdout</code> produces interleaved FASTQ. QC-only is valid when no output files are specified.</div></div>
+      <div class="grid fileout">
+        <div class="field"><label>Read 1 output: <code>-o/--out1</code></label><input id="out1" placeholder="clean_R1.fastq.gz"><div class="help">Output is gzip-compressed automatically when the filename ends in <code>.gz</code>.</div></div>
+        <div class="field peout"><label>Read 2 output: <code>-O/--out2</code></label><input id="out2" placeholder="clean_R2.fastq.gz"><div class="help">Required for paired-end file output unless using merge-only output or STDOUT.</div></div>
+      </div>
+      <div class="field"><label>Gzip compression level: <code>-z/--compression</code></label><input type="number" id="compression" min="1" max="9" value="4"><div class="help">1 is fastest, 9 is smallest. Default is 4.</div></div>
+      <div class="check"><input type="checkbox" id="dont_overwrite"><label for="dont_overwrite">Refuse to overwrite existing files: <code>--dont_overwrite</code><div class="help">fastp will stop if output FASTQ or report files already exist.</div></label></div>
+    </fieldset>
+    <fieldset><legend>Optional failed / unpaired outputs</legend>
+      <div class="grid">
+        <div class="field"><label>Unpaired R1 output: <code>--unpaired1</code></label><input id="unpaired1" placeholder="unpaired.fastq.gz"><div class="help">For PE input: stores R1 reads that pass QC when their R2 mate fails.</div></div>
+        <div class="field"><label>Unpaired R2 output: <code>--unpaired2</code></label><input id="unpaired2" placeholder="unpaired.fastq.gz"><div class="help">Can be the same filename as unpaired1 to collect both unpaired directions together.</div></div>
+        <div class="field full"><label>Failed reads output: <code>--failed_out</code></label><input id="failed_out" placeholder="failed.fastq.gz"><div class="help">Stores reads that fail filters; failure reason is appended to the read name.</div></div>
+      </div>
+    </fieldset>
+    <fieldset><legend>Merge paired-end reads</legend>
+      <div class="check"><input type="checkbox" id="merge"><label for="merge">Merge overlapping paired reads: <code>-m/--merge</code><div class="help">Only valid for paired-end input. Merged reads must go to <code>--merged_out</code> or STDOUT.</div></label></div>
+      <div class="field"><label>Merged output: <code>--merged_out</code></label><input id="merged_out" placeholder="merged.fastq.gz"><div class="help">Required in merge mode unless output mode is STDOUT.</div></div>
+      <div class="check"><input type="checkbox" id="include_unmerged"><label for="include_unmerged">Include unmerged/unpaired reads in merged output: <code>--include_unmerged</code><div class="help">Produces one combined file containing merged plus unmerged reads.</div></label></div>
+    </fieldset>
+  </section>
+
+  <section class="tabpanel" data-title="Adapters">
+    <fieldset><legend>Adapter trimming</legend>
+      <div class="check"><input type="checkbox" id="disable_adapter"><label for="disable_adapter">Disable adapter trimming: <code>-A/--disable_adapter_trimming</code><div class="help">Adapter trimming is enabled by default. Turn this on only when you deliberately want no adapter trimming.</div></label></div>
+      <div class="check"><input type="checkbox" id="detect_adapter_for_pe"><label for="detect_adapter_for_pe">Detect adapters for PE data: <code>-2/--detect_adapter_for_pe</code><div class="help">Recommended for ultra-clean paired-end output. It is slower but can catch a little more adapter sequence.</div></label></div>
+      <div class="grid">
+        <div class="field"><label>R1 adapter sequence: <code>-a/--adapter_sequence</code></label><input id="adapter_sequence" placeholder="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA"><div class="help">For SE, manually specifying this disables auto-detection. For PE, it is used if overlap-based trimming does not find an overlap.</div></div>
+        <div class="field"><label>R2 adapter sequence: <code>--adapter_sequence_r2</code></label><input id="adapter_sequence_r2" placeholder="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"><div class="help">Paired-end only. If omitted, fastp may use the R1 adapter sequence for R2.</div></div>
+        <div class="field full"><label>Adapter FASTA file: <code>--adapter_fasta</code></label><input id="adapter_fasta" placeholder="adapters.fa"><div class="help">Trim multiple adapter or unwanted sequences from a FASTA file. Sequences shorter than 6 bp are skipped.</div></div>
+      </div>
+      <div class="check"><input type="checkbox" id="allow_gap_overlap_trimming"><label for="allow_gap_overlap_trimming">Allow one gap in PE overlap adapter trimming: <code>--allow_gap_overlap_trimming</code><div class="help">May find very slightly more adapters, but usually has limited effect and costs time.</div></label></div>
+    </fieldset>
+  </section>
+
+  <section class="tabpanel" data-title="Quality">
+    <fieldset><legend>Quality filtering</legend>
+      <div class="check"><input type="checkbox" id="disable_quality"><label for="disable_quality">Disable quality filtering: <code>-Q/--disable_quality_filtering</code><div class="help">Quality filtering is enabled by default. Disable only when you want QC reporting without quality-based filtering.</div></label></div>
+      <div class="grid">
+        <div class="field"><label>Qualified base threshold: <code>-q</code></label><input type="number" id="qualified_quality_phred" min="0" max="93" value="15"><div class="help">A base is “qualified” if its Phred score is at least this value. Default Q15.</div></div>
+        <div class="field"><label>Max unqualified base %: <code>-u</code></label><input type="number" id="unqualified_percent_limit" min="0" max="100" value="40"><div class="help">Discard reads with more than this percentage of bases below the qualified threshold. Default 40%.</div></div>
+        <div class="field"><label>Max N bases: <code>-n</code></label><input type="number" id="n_base_limit" min="0" value="5"><div class="help">Discard reads with more N bases than this limit. Default 5.</div></div>
+        <div class="field"><label>Minimum average quality: <code>-e</code></label><input type="number" id="average_qual" min="0" value="0"><div class="help">0 means no average-quality requirement. If set, reads below this mean quality are discarded.</div></div>
+      </div>
+    </fieldset>
+    <fieldset><legend>Per-read sliding-window trimming</legend>
+      <div class="check"><input type="checkbox" id="cut_front"><label for="cut_front">Trim low-quality bases from 5′ end: <code>-5/--cut_front</code></label></div>
+      <div class="check"><input type="checkbox" id="cut_tail"><label for="cut_tail">Trim low-quality bases from 3′ end: <code>-3/--cut_tail</code></label></div>
+      <div class="check"><input type="checkbox" id="cut_right"><label for="cut_right">Sliding-window cut right side: <code>-r/--cut_right</code><div class="help">More aggressive than cut_tail; when enabled, cut_tail is usually unnecessary.</div></label></div>
+      <div class="grid"><div class="field"><label>Shared window size: <code>-W</code></label><input type="number" id="cut_window_size" min="1" max="1000" value="4"><div class="help">Window size for cut_front, cut_tail and cut_right unless specific values are set.</div></div><div class="field"><label>Shared mean quality: <code>-M</code></label><input type="number" id="cut_mean_quality" min="1" max="36" value="20"><div class="help">Default Q20 mean quality threshold.</div></div></div>
+    </fieldset>
+  </section>
+
+  <section class="tabpanel" data-title="Length & trimming">
+    <fieldset><legend>Length filtering</legend>
+      <div class="check"><input type="checkbox" id="disable_length"><label for="disable_length">Disable length filtering: <code>-L/--disable_length_filtering</code><div class="help">Length filtering is enabled by default.</div></label></div>
+      <div class="grid"><div class="field"><label>Minimum read length: <code>-l</code></label><input type="number" id="length_required" min="0" value="15"><div class="help">Reads shorter than this after trimming are discarded. Default 15.</div></div><div class="field"><label>Maximum read length: <code>--length_limit</code></label><input type="number" id="length_limit" min="0" value="0"><div class="help">0 means no upper limit. Useful for small RNA or targeted size selection.</div></div></div>
+    </fieldset>
+    <fieldset><legend>Global trimming and max length</legend>
+      <div class="grid"><div class="field"><label>Trim front R1/SE: <code>-f</code></label><input type="number" id="trim_front1" min="0" value="0"></div><div class="field"><label>Trim tail R1/SE: <code>-t</code></label><input type="number" id="trim_tail1" min="0" value="0"></div><div class="field"><label>Max length R1/SE: <code>-b</code></label><input type="number" id="max_len1" min="0" value="0"><div class="help">0 means no maximum length.</div></div><div></div><div class="field"><label>Trim front R2: <code>-F</code></label><input type="number" id="trim_front2" min="0" value="0"><div class="help">If omitted in fastp, R2 follows R1. Here, add only when non-zero.</div></div><div class="field"><label>Trim tail R2: <code>-T</code></label><input type="number" id="trim_tail2" min="0" value="0"></div><div class="field"><label>Max length R2: <code>-B</code></label><input type="number" id="max_len2" min="0" value="0"></div></div>
+    </fieldset>
+    <fieldset><legend>PolyG / polyX and low complexity</legend>
+      <div class="check"><input type="checkbox" id="trim_poly_g"><label for="trim_poly_g">Force polyG trimming: <code>-g/--trim_poly_g</code><div class="help">Useful for two-colour Illumina data. fastp auto-enables this for NextSeq/NovaSeq by machine ID.</div></label></div>
+      <div class="check"><input type="checkbox" id="disable_trim_poly_g"><label for="disable_trim_poly_g">Disable polyG trimming: <code>-G/--disable_trim_poly_g</code></label></div>
+      <div class="field"><label>PolyG minimum tail length: <code>--poly_g_min_len</code></label><input type="number" id="poly_g_min_len" min="1" value="10"></div>
+      <div class="check"><input type="checkbox" id="trim_poly_x"><label for="trim_poly_x">Enable polyX trimming: <code>-x/--trim_poly_x</code><div class="help">Useful for trimming polyA/polyX tails, for example in RNA-seq.</div></label></div>
+      <div class="field"><label>PolyX minimum tail length: <code>--poly_x_min_len</code></label><input type="number" id="poly_x_min_len" min="1" value="10"></div>
+      <div class="check"><input type="checkbox" id="low_complexity_filter"><label for="low_complexity_filter">Enable low-complexity filter: <code>-y/--low_complexity_filter</code></label></div>
+      <div class="field"><label>Complexity threshold: <code>-Y</code></label><input type="number" id="complexity_threshold" min="0" max="100" value="30"><div class="help">Minimum percent of adjacent bases that differ. Default 30%.</div></div>
+    </fieldset>
+  </section>
+
+  <section class="tabpanel" data-title="UMI & PE overlap">
+    <fieldset><legend>UMI processing</legend>
+      <div class="check"><input type="checkbox" id="umi"><label for="umi">Enable UMI preprocessing: <code>-U/--umi</code><div class="help">Extracts UMI and appends it to read names. If UMI is in reads, it is removed from sequence.</div></label></div>
+      <div class="grid"><div class="field"><label>UMI location: <code>--umi_loc</code></label><select id="umi_loc"><option value="">None</option><option>index1</option><option>index2</option><option>read1</option><option>read2</option><option>per_index</option><option>per_read</option></select><div class="help">read2, index2 and per_read are paired-end concepts.</div></div><div class="field"><label>UMI length: <code>--umi_len</code></label><input type="number" id="umi_len" min="0" value="0"><div class="help">Required when UMI location is read1, read2 or per_read.</div></div><div class="field"><label>UMI prefix: <code>--umi_prefix</code></label><input id="umi_prefix" placeholder="UMI"></div><div class="field"><label>Skip bases after UMI: <code>--umi_skip</code></label><input type="number" id="umi_skip" min="0" value="0"></div></div>
+    </fieldset>
+    <fieldset><legend>PE overlap analysis</legend>
+      <div class="check"><input type="checkbox" id="correction"><label for="correction">Correct bases in overlapped PE reads: <code>-c/--correction</code><div class="help">Paired-end only. Uses overlap analysis to correct mismatches when one base is high quality and the mate is very low quality.</div></label></div>
+      <div class="grid"><div class="field"><label>Minimum overlap length: <code>--overlap_len_require</code></label><input type="number" id="overlap_len_require" min="1" value="30"></div><div class="field"><label>Max overlap mismatches: <code>--overlap_diff_limit</code></label><input type="number" id="overlap_diff_limit" min="0" value="5"></div><div class="field"><label>Max mismatch percent: <code>--overlap_diff_percent_limit</code></label><input type="number" id="overlap_diff_percent_limit" min="0" max="100" value="20"></div></div>
+    </fieldset>
+  </section>
+
+  <section class="tabpanel" data-title="Reports & performance">
+    <fieldset><legend>Reports</legend>
+      <div class="grid"><div class="field"><label>HTML report: <code>-h/--html</code></label><input id="html" value="fastp.html"><div class="help">Interactive fastp QC report. Default: fastp.html.</div></div><div class="field"><label>JSON report: <code>-j/--json</code></label><input id="json" value="fastp.json"><div class="help">Machine-readable QC report. Default: fastp.json.</div></div><div class="field full"><label>Report title: <code>-R/--report_title</code></label><input id="report_title" value="fastp report"><div class="help">Quote the title when it contains spaces.</div></div></div>
+    </fieldset>
+    <fieldset><legend>Threads, duplication and splitting</legend>
+      <div class="field"><label>Threads: <code>-w/--thread</code></label><input type="number" id="thread" min="1" value="3"><div class="help">Number of worker threads. Default is 3.</div></div>
+      <div class="check"><input type="checkbox" id="dont_eval_duplication"><label for="dont_eval_duplication">Skip duplication-rate evaluation: <code>--dont_eval_duplication</code><div class="help">Saves time and memory unless deduplication is enabled.</div></label></div>
+      <div class="check"><input type="checkbox" id="dedup"><label for="dedup">Remove exact duplicate reads/pairs: <code>-D/--dedup</code></label></div>
+      <div class="field"><label>Duplication accuracy level: <code>--dup_calc_accuracy</code></label><input type="number" id="dup_calc_accuracy" min="0" max="6" value="0"><div class="help">0 = let fastp choose. Higher levels use more memory.</div></div>
+      <div class="field"><label>Output splitting mode</label><select id="split_mode"><option value="none">No splitting</option><option value="files">Split by number of files: -s/--split</option><option value="lines">Split by lines per file: -S/--split_by_lines</option></select></div>
+      <div class="grid"><div class="field"><label>Number of split files: <code>-s</code></label><input type="number" id="split" min="0" value="0"></div><div class="field"><label>Lines per split file: <code>-S</code></label><input type="number" id="split_by_lines" min="0" value="0"></div><div class="field"><label>Prefix digits: <code>-d</code></label><input type="number" id="split_prefix_digits" min="0" max="10" value="4"></div></div>
+    </fieldset>
+    <fieldset><legend>Overrepresented sequence analysis</legend>
+      <div class="check"><input type="checkbox" id="overrepresentation_analysis"><label for="overrepresentation_analysis">Enable analysis: <code>-p/--overrepresentation_analysis</code></label></div>
+      <div class="field"><label>Sampling rate: <code>-P/--overrepresentation_sampling</code></label><input type="number" id="overrepresentation_sampling" min="1" max="10000" value="20"><div class="help">1 means all reads and can be very slow. Default 20 samples one in twenty reads.</div></div>
+    </fieldset>
+  </section>
+</div>
+
+<aside class="card side"><div class="inner">
+  <h2 style="margin:0 0 10px;font-size:20px">Command preview</h2>
+  <div id="messages"></div>
+  <pre id="cmd">fastp</pre>
+  <div class="row"><button class="copy" id="copy">Copy command</button><button class="secondary" id="reset">Reset</button></div>
+  <p class="small">Shell quoting is applied automatically for values containing spaces or special characters. Empty/default options are omitted where practical.</p>
+</div></aside>
+</main>
+<script>
+const $=id=>document.getElementById(id); const val=id=>$(id)?.value.trim(); const checked=id=>$(id)?.checked; const num=id=>Number($(id)?.value||0);
+const defaults={compression:4,qualified_quality_phred:15,unqualified_percent_limit:40,n_base_limit:5,average_qual:0,length_required:15,length_limit:0,cut_window_size:4,cut_mean_quality:20,trim_front1:0,trim_tail1:0,max_len1:0,trim_front2:0,trim_tail2:0,max_len2:0,poly_g_min_len:10,poly_x_min_len:10,complexity_threshold:30,overlap_len_require:30,overlap_diff_limit:5,overlap_diff_percent_limit:20,umi_len:0,umi_skip:0,thread:3,dup_calc_accuracy:0,split:0,split_by_lines:0,split_prefix_digits:4,overrepresentation_sampling:20};
+function sh(s){ if(!s) return ''; return /^[A-Za-z0-9_./:=,+@%-]+$/.test(s)?s:"'"+s.replaceAll("'","'\\''")+"'"; }
+function add(cmd,flag,value){ if(value===undefined || value===null || value==='') cmd.push(flag); else cmd.push(flag,sh(String(value))); }
+function isPE(){return ['pe','interleaved','stdin_interleaved'].includes(val('layout'))}
+function isSTDIN(){return ['stdin_se','stdin_interleaved'].includes(val('layout'))}
+function activeFileInput(){return ['se','pe','interleaved'].includes(val('layout'))}
+function addNum(cmd,id,flag){ if(num(id)!==defaults[id]) add(cmd,flag,num(id)); }
+function build(){
+ let cmd=['fastp']; let errs=[], warns=[], hints=[]; let pe=isPE(), stdin=isSTDIN(), outmode=val('outmode'), merge=checked('merge');
+ if(stdin){ add(cmd,'--stdin'); if(val('layout')==='stdin_interleaved') add(cmd,'--interleaved_in'); }
+ else { if(!val('in1')) errs.push('Input file R1 / --in1 is required unless using STDIN.'); else add(cmd,'-i',val('in1')); if(val('layout')==='pe'){ if(!val('in2')) errs.push('Paired-end input requires R2 / --in2.'); else add(cmd,'-I',val('in2')); } if(val('layout')==='interleaved') add(cmd,'--interleaved_in'); }
+ if(checked('phred64')) add(cmd,'-6'); if(checked('fix_mgi_id')) add(cmd,'--fix_mgi_id'); addNum(cmd,'reads_to_process','--reads_to_process');
+ if(outmode==='stdout') add(cmd,'--stdout');
+ if(outmode==='files'){
+   if(merge && !val('include_unmerged') && val('merged_out')) { /* allow merged-only plus optional out1/out2 */ }
+   if(!val('out1')) errs.push('File output mode requires --out1, unless you choose STDOUT or QC-only.'); else add(cmd,'-o',val('out1'));
+   if(pe && !merge){ if(!val('out2')) errs.push('Paired-end file output requires --out2, unless using STDOUT, QC-only, or merge mode.'); else add(cmd,'-O',val('out2')); }
+   if(pe && merge && val('out2')) add(cmd,'-O',val('out2'));
+ }
+ if(outmode==='qc_only') hints.push('QC-only mode is valid: fastp will produce reports but no cleaned FASTQ output.');
+ addNum(cmd,'compression','-z'); if(checked('dont_overwrite')) add(cmd,'--dont_overwrite');
+ if(val('unpaired1')) add(cmd,'--unpaired1',val('unpaired1')); if(val('unpaired2')) add(cmd,'--unpaired2',val('unpaired2')); if(val('failed_out')) add(cmd,'--failed_out',val('failed_out'));
+ if(merge){ add(cmd,'-m'); if(!pe) errs.push('Merge mode requires paired-end input.'); if(outmode!=='stdout' && !val('merged_out')) errs.push('Merge mode requires --merged_out unless output mode is STDOUT.'); if(val('merged_out')) add(cmd,'--merged_out',val('merged_out')); if(checked('include_unmerged')) add(cmd,'--include_unmerged'); }
+ if(checked('disable_adapter')) add(cmd,'-A'); if(checked('detect_adapter_for_pe')) add(cmd,'-2'); if(val('adapter_sequence')) add(cmd,'-a',val('adapter_sequence')); if(val('adapter_sequence_r2')) add(cmd,'--adapter_sequence_r2',val('adapter_sequence_r2')); if(val('adapter_fasta')) add(cmd,'--adapter_fasta',val('adapter_fasta')); if(checked('allow_gap_overlap_trimming')) add(cmd,'--allow_gap_overlap_trimming');
+ if(stdin && !checked('disable_adapter')) warns.push('Adapter auto-detection is disabled in STDIN mode; provide adapter sequences/FASTA or accept only non-auto trimming behaviour.');
+ if(checked('detect_adapter_for_pe')&&!pe) warns.push('--detect_adapter_for_pe only makes sense for paired-end input.'); if(val('adapter_sequence_r2')&&!pe) warns.push('--adapter_sequence_r2 is paired-end only.');
+ if(checked('disable_quality')) add(cmd,'-Q'); else { addNum(cmd,'qualified_quality_phred','-q'); addNum(cmd,'unqualified_percent_limit','-u'); addNum(cmd,'n_base_limit','-n'); addNum(cmd,'average_qual','-e'); }
+ if(checked('cut_front')) add(cmd,'-5'); if(checked('cut_tail')) add(cmd,'-3'); if(checked('cut_right')) add(cmd,'-r'); if(checked('cut_right')&&checked('cut_tail')) warns.push('--cut_right is more aggressive than --cut_tail; using both is usually redundant.'); if(checked('dedup')&&(checked('cut_front')||checked('cut_tail')||checked('cut_right'))) warns.push('Quality cutting can interfere with deduplication because dedup relies on exact sequence matches.');
+ if(checked('cut_front')||checked('cut_tail')||checked('cut_right')){ addNum(cmd,'cut_window_size','-W'); addNum(cmd,'cut_mean_quality','-M'); }
+ if(checked('disable_length')) add(cmd,'-L'); else { addNum(cmd,'length_required','-l'); addNum(cmd,'length_limit','--length_limit'); }
+ ['trim_front1','trim_tail1','max_len1','trim_front2','trim_tail2','max_len2'].forEach((id)=>{const map={trim_front1:'-f',trim_tail1:'-t',max_len1:'-b',trim_front2:'-F',trim_tail2:'-T',max_len2:'-B'}; addNum(cmd,id,map[id]);});
+ if((num('trim_front2')||num('trim_tail2')||num('max_len2'))&&!pe) warns.push('R2 trimming options are ignored conceptually for single-end input.');
+ if(checked('trim_poly_g')) add(cmd,'-g'); if(checked('disable_trim_poly_g')) add(cmd,'-G'); if(checked('trim_poly_g')&&checked('disable_trim_poly_g')) errs.push('Choose either force polyG trimming or disable polyG trimming, not both.'); if(num('poly_g_min_len')!==10) add(cmd,'--poly_g_min_len',num('poly_g_min_len'));
+ if(checked('trim_poly_x')) add(cmd,'-x'); if(num('poly_x_min_len')!==10) add(cmd,'--poly_x_min_len',num('poly_x_min_len'));
+ if(checked('low_complexity_filter')){ add(cmd,'-y'); addNum(cmd,'complexity_threshold','-Y'); }
+ if(checked('umi')){ add(cmd,'-U'); if(!val('umi_loc')) errs.push('UMI mode requires --umi_loc.'); else add(cmd,'--umi_loc',val('umi_loc')); if(['read1','read2','per_read'].includes(val('umi_loc')) && num('umi_len')<=0) errs.push('UMI location read1/read2/per_read requires --umi_len.'); addNum(cmd,'umi_len','--umi_len'); if(val('umi_prefix')) add(cmd,'--umi_prefix',val('umi_prefix')); addNum(cmd,'umi_skip','--umi_skip'); if(['read2','index2','per_read'].includes(val('umi_loc'))&&!pe) errs.push('Selected UMI location requires paired-end input.'); }
+ if(checked('correction')){ add(cmd,'-c'); if(!pe) errs.push('Base correction by overlap is paired-end only.'); }
+ addNum(cmd,'overlap_len_require','--overlap_len_require'); addNum(cmd,'overlap_diff_limit','--overlap_diff_limit'); addNum(cmd,'overlap_diff_percent_limit','--overlap_diff_percent_limit');
+ if(val('json')&&val('json')!=='fastp.json') add(cmd,'-j',val('json')); if(val('html')&&val('html')!=='fastp.html') add(cmd,'-h',val('html')); if(val('report_title')&&val('report_title')!=='fastp report') add(cmd,'-R',val('report_title'));
+ addNum(cmd,'thread','-w'); if(checked('dont_eval_duplication')) add(cmd,'--dont_eval_duplication'); if(checked('dedup')) add(cmd,'-D'); if(checked('dedup')&&checked('dont_eval_duplication')) warns.push('--dedup ignores --dont_eval_duplication.'); addNum(cmd,'dup_calc_accuracy','--dup_calc_accuracy');
+ if(val('split_mode')==='files'){ if(num('split')<2) errs.push('Split-by-files mode requires --split between 2 and 999.'); else add(cmd,'-s',num('split')); }
+ if(val('split_mode')==='lines'){ if(num('split_by_lines')<1000) errs.push('Split-by-lines mode requires --split_by_lines >= 1000.'); else add(cmd,'-S',num('split_by_lines')); }
+ if(val('split_mode')!=='none') addNum(cmd,'split_prefix_digits','-d');
+ if(checked('overrepresentation_analysis')){ add(cmd,'-p'); addNum(cmd,'overrepresentation_sampling','-P'); }
+ if(pe && outmode==='stdout') hints.push('For paired-end input, --stdout writes interleaved FASTQ records.');
+ $('cmd').textContent=cmd.join(' ');
+ let html=''; if(errs.length) html+=errs.map(x=>`<div class="status err">✖ ${x}</div>`).join(''); else html+='<div class="status ok">✓ No blocking consistency errors detected.</div>'; html+=warns.map(x=>`<div class="status warn">⚠ ${x}</div>`).join(''); html+=hints.map(x=>`<div class="status hint">ℹ ${x}</div>`).join(''); $('messages').innerHTML=html;
+ document.querySelectorAll('.peonly,.peout').forEach(e=>e.style.display=pe?'block':'none'); document.querySelectorAll('.fileout').forEach(e=>e.style.display=outmode==='files'?'grid':'none');
+}
+function initTabs(){ const tabs=$('tabs'); document.querySelectorAll('.tabpanel').forEach((p,i)=>{let b=document.createElement('button'); b.className='tab'+(i?'':' active'); b.textContent=p.dataset.title; b.onclick=()=>{document.querySelectorAll('.tab,.tabpanel').forEach(x=>x.classList.remove('active')); b.classList.add('active'); p.classList.add('active')}; tabs.appendChild(b);});}
+function resetAll(){ document.querySelectorAll('input').forEach(i=>{ if(i.type==='checkbox') i.checked=false; else if(defaults[i.id]!==undefined) i.value=defaults[i.id]; else i.value=i.defaultValue||'';}); document.querySelectorAll('select').forEach(s=>s.selectedIndex=0); $('html').value='fastp.html'; $('json').value='fastp.json'; $('report_title').value='fastp report'; build(); }
+document.addEventListener('input',build); document.addEventListener('change',build); $('copy').onclick=()=>navigator.clipboard.writeText($('cmd').textContent); $('reset').onclick=resetAll; initTabs(); build();
+</script>
+</body>
+</html>

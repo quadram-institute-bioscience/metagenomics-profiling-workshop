@@ -1,12 +1,12 @@
 ---
-title: "Pavian"
+title: "EXTRA: Pavian"
 ---
 # Pavian: Interactive Visualization of Taxonomic Profiles
 
 ---
 
 > The Workshop materia;ls available to download 
-> [Figshare](https://figshare.com/articles/presentation/MMB_DTP_workshop_-_Introduction_to_taxonomic_profiling_of_metagenomes/30704492)
+> [Figshare](https://doi.org/10.6084/m9.figshare.32900546)
 
 ## Overview
 
@@ -47,7 +47,7 @@ if (!require(remotes)) {
 remotes::install_github("fbreitwieser/pavian")
 ```
 
-⏱️ **Installation time:** 2-3 minutes (only needed once)
+⏱️ **Installation time:** 2-3 minutes (only needed once) -- If prompted, skip any package update
 
 ### Step 2: Launch Pavian
 
@@ -66,28 +66,32 @@ pavian::runApp(port=5000)
 
 ## Preparing Your Data
 
+**Pavian can use the files on CLIMB**
+If you are using a CLIMB notebook, you have access to the file system in Pavian using
+the "Server files" browser. Alternatively, you can download the profiles
+
 ### Download Profile Files
 
 Download the 6 coffee fermentation samples from the server:
 
 **Option 1: MetaPhlAn4 profiles**
 ```
-shared-team/users/{your_name}/Session1_profiling/Metaphlan/T0_ERR2231567.unclprofile.txt
-shared-team/users/{your_name}/Session1_profiling/Metaphlan/T16_ERR2231569.unclprofile.txt
-shared-team/users/{your_name}/Session1_profiling/Metaphlan/T24_ERR2231570.unclprofile.txt
-shared-team/users/{your_name}/Session1_profiling/Metaphlan/T36_ERR2231571.unclprofile.txt
-shared-team/users/{your_name}/Session1_profiling/Metaphlan/T64_ERR2231572.unclprofile.txt
-shared-team/users/{your_name}/Session1_profiling/Metaphlan/T8_ERR2231568.unclprofile.txt
+shared-team/datasets/day2/1.metaphlan4_precomputed/T0_ERR2231567.profile.txt
+shared-team/datasets/day2/1.metaphlan4_precomputed/T8_ERR2231568.profile.txt
+shared-team/datasets/day2/1.metaphlan4_precomputed/T16_ERR2231569.profile.txt
+shared-team/datasets/day2/1.metaphlan4_precomputed/T24_ERR2231570.profile.txt
+shared-team/datasets/day2/1.metaphlan4_precomputed/T36_ERR2231571.profile.txt
+shared-team/datasets/day2/1.metaphlan4_precomputed/T64_ERR2231572.profile.txt
 ```
 
-**Option 2: Bracken profiles**
+**Option 2: Kraken or Bracken profiles**
 ```
-shared-team/users/{your_name}/Session1_profiling/Bracken/T0_ERR2231567_profiles_bracken_species.txt
-shared-team/users/{your_name}/Session1_profiling/Bracken/T16_ERR2231569_profiles_bracken_species.txt
-shared-team/users/{your_name}/Session1_profiling/Bracken/T24_ERR2231570_profiles_bracken_species.txt
-shared-team/users/{your_name}/Session1_profiling/Bracken/T36_ERR2231571_profiles_bracken_species.txt
-shared-team/users/{your_name}/Session1_profiling/Bracken/T64_ERR2231572_profiles_bracken_species.txt
-shared-team/users/{your_name}/Session1_profiling/Bracken/T8_ERR2231568_profiles_bracken_species.txt
+shared-team/datasets/day2/2.Kraken2_precomputed/1.Kraken2/T0_ERR2231567_profiles.txt
+shared-team/datasets/day2/2.Kraken2_precomputed/1.Kraken2/T8_ERR2231568_profiles.txt
+shared-team/datasets/day2/2.Kraken2_precomputed/1.Kraken2/T16_ERR2231569_profiles.txt
+shared-team/datasets/day2/2.Kraken2_precomputed/1.Kraken2/T24_ERR2231570_profiles.txt
+shared-team/datasets/day2/2.Kraken2_precomputed/1.Kraken2/T36_ERR2231571_profiles.txt
+shared-team/datasets/day2/2.Kraken2_precomputed/1.Kraken2/T64_ERR2231572_profiles.txt
 ```
 
 **How to download:**

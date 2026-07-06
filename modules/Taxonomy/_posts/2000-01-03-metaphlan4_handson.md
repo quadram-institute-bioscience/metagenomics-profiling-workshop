@@ -1,88 +1,12 @@
 ---
-title: "MetaPhlAn4"
+title: "MetaPhlAn4 hands-on"
 ---
 # MetaPhlAn4: Marker Gene-Based Taxonomic Profiling
 
 ---
 
 > The Workshop material is available to download in 
-> [Figshare](https://figshare.com/articles/presentation/MMB_DTP_workshop_-_Introduction_to_taxonomic_profiling_of_metagenomes/30704492)
-
-### What is MetaPhlAn4?
-
-**MetaPhlAn4** (Metagenomic Phylogenetic Analysis) is a computational tool for profiling the taxonomic composition of microbial communities from metagenomic shotgun sequencing data.
-
-**Key Features:**
-- Uses ~1.1 million unique **clade-specific marker genes**
-- Prioritizes **specificity over sensitivity**
-- Provides **relative abundance** estimates (%)
-- Reports taxonomy from **kingdom to strain level**
-
-### How Does MetaPhlAn4 Work?
-
-1. **Marker Gene Database (ChocoPhlAn)**
-   - Contains uniquely identifying marker genes for ~100,000 reference genomes
-   - Each marker is specific to a particular clade (species, genus, family, etc.)
-   - Markers are carefully selected to avoid cross-mapping
-
-2. **Alignment Step**
-   - Reads are mapped to the marker gene database using Bowtie2
-   - Only reads that map to marker genes are used for profiling
-   - Unmapped reads are considered "unclassified"
-
-3. **Abundance Calculation**
-   - Relative abundances calculated from marker gene coverage
-   - Higher coverage = higher abundance
-   - Results normalized to sum to 100%
-
-### Advantages
-
-✅ **High specificity** - Low false positive rate  
-✅ **Fast** - Only maps to markers, not full genomes  
-✅ **Relative abundances** - Ready for downstream statistical analyses  
-
-### Limitations
-
-⚠️ **High unclassified fraction** - Especially in novel/understudied environments  
-⚠️ **Database-dependent** - Can only detect organisms in the database  
-⚠️ **Lower sensitivity** - May miss rare or novel taxa  
-
-### When to Use MetaPhlAn4?
-
-- When you need **high confidence** in detected organisms
-- For **comparative studies** across samples
-- When working with **well-characterized environments** (human gut, etc.)
-
----
-
-## Hands-On: Running and Exploring MetaPhlAn4
-
-### Prerequisites
-
-Make sure you have:
-- Access to the climb shared project
-- Data symlinked / copied to your workspace
-
-```bash
-export WSUSER=/shared/team/users/{your_name}/
-mkdir -p $WSUSER
-
-# Symlinks to raw/ and tax_profiles/
-ln -s /shared/team/2025_training/week5/coffee/raw $WSUSER/
-
-# Copy the session's material to your location
-cp -r /shared/team/2025_training/week5/tutorial/Session1_profiling $WSUSER/
-
-ls -lh
-```
-
-- MetaPhlAn4 conda environment available
-
-```bash
-conda activate /shared/team/conda/aliseponsero.mmb-dtp/metaphlan
-```
-
-- RStudio access on the notebook
+> [Figshare](https://doi.org/10.6084/m9.figshare.32900546)
 
 ---
 
@@ -92,8 +16,8 @@ conda activate /shared/team/conda/aliseponsero.mmb-dtp/metaphlan
 
 MetaPhlAn4 requires a pre-built database of marker genes. For this workshop, the database is located at:
 
-```
-/shared/team/2025_training/week5/databases/metaphlan/
+```bash
+/shared/team/conda/telatin.cli-giba-2026/mpa/lib/python3.13/site-packages/metaphlan/metaphlan_databases
 ```
 
 **Key files in the database:**
@@ -103,17 +27,15 @@ MetaPhlAn4 requires a pre-built database of marker genes. For this workshop, the
 
 **To explore:**
 ```bash
-ls -lh /shared/team/2025_training/week5/databases/metaphlan/
+ls -lh /shared/team/conda/telatin.cli-giba-2026/mpa/lib/python3.13/site-packages/metaphlan/metaphlan_databases
 ```
-
----
 
 ## Part 2: Running MetaPhlAn4
 
 ### Step 1: Activate the Environment
 
 ```bash
-conda activate /shared/team/conda/aliseponsero.mmb-dtp/metaphlan
+conda activate /shared/team/conda/telatin.cli-giba-2026/mpa
 ```
 
 ### Step 2: Check Installation
@@ -131,7 +53,7 @@ metaphlan --help
 **Key parameters to understand:**
 - Input files (paired-end: comma-separated, no space!)
 - `--input_type fastq` - Specifies input format
-- `--db_dir` - Path to database directory
+- `--db_dir` - Path to database directory -- default location if omitted
 - `--offline` - Don't check for database updates
 - `--nproc` - Number of processors to use
 - `-o` or `--output_file` - Path to output file
@@ -146,13 +68,22 @@ For paired-end reads, MetaPhlAn4 requires input files separated by a comma with 
 ```bash
 metaphlan [FORWARD],[REVERSE] \
     --input_type fastq \
-    --db_dir [DATABASE_PATH] \
     --offline \
     --nproc [N] \
     -o [OUTPUT] \
     --mapout [MAPPING_OUTPUT]
 ```
 
+You can test this command on a small subset of reads:
+
+```bash
+metaphlan $WSUSER/small_subset/subset_R1.fq.gz,$WSUSER/small_subset/subset_R2.fq.gz \
+    --input_type fastq \
+    --offline \
+    --nproc 6 \
+    -o $WSUSER/test_mpa.txt \
+    --mapout $WSUSER/test_mpa.bt2
+```
 ⏱️ **Runtime:** 5-10 minutes for the subset sample --> We will use precomputed results
 
 💡 **Tip:** The `--mapout` file can be reused to re-run MetaPhlAn4 with different parameters without re-mapping reads!
@@ -204,9 +135,6 @@ We will need to first install the packages we will use in this session
 
 ```r
 install.packages("tidyverse")
-
-if (!require(remotes)) { install.packages("remotes") }
-remotes::install_github("fbreitwieser/pavian")
 ```
 
 ### Load Required Libraries
@@ -218,21 +146,22 @@ library(tidyverse)
 ### Read the MetaPhlAn4 Profile
 
 ```r
-# Read a precomputed profile
-MYDIR="/shared/team/users/{your_name}/"
+MPA_DIR="/shared/team/datasets/day2/1.metaphlan4_precomputed"
 
-profile_no_uncl <- read_tsv(paste(MYDIR, "Session1_profiling/Metaphlan/T0_ERR2231567.profile.txt", sep="/"), 
+profile_no_uncl <- read_tsv(paste(MPA_DIR, "T0_ERR2231567.profile.txt", sep="/"), 
                     skip = 4,
                     show_col_types = FALSE) %>%
         rename("clade_name"=`#clade_name`)
+
 
 ```
 
 ### Compare Profiles With/Without Unclassified Estimation
 
 ```r
+MPA_DIR="/shared/team/datasets/day2/1.metaphlan4_precomputed"
 # Read profile WITH unclassified
-profile_uncl <- read_tsv(paste(MYDIR, "Session1_profiling/Metaphlan/T0_ERR2231567.unclprofile.txt", sep="/"), 
+profile_uncl <- read_tsv(paste(MPA_DIR, "T0_ERR2231567.unclprofile.txt", sep="/"), 
                          skip = 4,
                     show_col_types = FALSE) %>%
         rename("clade_name"=`#clade_name`)
@@ -240,7 +169,7 @@ profile_uncl <- read_tsv(paste(MYDIR, "Session1_profiling/Metaphlan/T0_ERR223156
 # Check for UNCLASSIFIED entry
 profile_uncl %>%
   filter(clade_name=="UNCLASSIFIED")
-
+  
 # Compare first few rows
 profile_uncl %>% head(5)
 profile_no_uncl %>% head(5)
