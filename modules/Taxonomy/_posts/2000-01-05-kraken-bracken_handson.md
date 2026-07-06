@@ -28,7 +28,8 @@ Kraken2 requires a pre-built database. For this workshop, we're using the **stan
 
 **To explore:**
 ```bash
-ls -lh /shared/public/db/kraken2/pluspf_8gb/2026-02-26
+KRA_DB="/shared/public/db/kraken2/pluspf_8gb/2026-02-26"
+ls -lh $KRA_DB
 ```
 
 ### Available Pre-built Databases
@@ -91,13 +92,14 @@ kraken2 --db [DATABASE_PATH] \
 You can test this command on a small subset of reads:
 
 ```bash
-DB="/shared/public/db/kraken2/pluspf_8gb/2026-02-26"
+KRA_DB="/shared/public/db/kraken2/pluspf_8gb/2026-02-26"
+SUBSET=/shared/team/datasets/coffee/small_subset
 
 kraken2 --db $DB \
     --threads 6 \
     --report  $WSUSER/test_Kraken2_report.txt \
     --output  $WSUSER/test_Kraken2.txt \
-    --paired $WSUSER/small_subset/subset_R1.fq.gz $WSUSER/small_subset/subset_R2.fq.gz
+    --paired $SUBSET/subset_R1.fq.gz $SUBSET/subset_R2.fq.gz
 ```
 
 💡 **Tip:** The `--output` file is very large (one line per read). For most analyses, you only need the `--report` file.
