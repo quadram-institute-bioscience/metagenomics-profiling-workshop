@@ -1,5 +1,5 @@
 ---
-title: "Before we start"
+title: "Prerequisites and reading list"
 ---
 
 ## Prerequisites
