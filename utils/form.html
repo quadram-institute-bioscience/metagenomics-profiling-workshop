@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metagenome Profiling Training — Feedback</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --antiflash-white: #F0F1F1;
+    --charcoal: #2F3D46;
+    --dark-green: #097E74;
+    --dark-green-hover: #0a6b62;
+    --acid-green: #B6BE00;
+
+    --paper: #ffffff;
+    --line: #dde1e1;
+    --muted: #61707a;
+    --charcoal-08: rgba(47, 61, 70, 0.08);
+
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --radius: 12px;
+    --shadow: 0 1px 2px rgba(47,61,70,0.06), 0 8px 24px rgba(47,61,70,0.06);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--antiflash-white);
+    color: var(--charcoal);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 20px 72px;
+  }
+
+  /* ---------- Header ---------- */
+  .topbar {
+    height: 6px;
+    background: linear-gradient(90deg, var(--dark-green) 0 70%, var(--acid-green) 70% 100%);
+  }
+
+  header.masthead {
+    padding: 44px 0 8px;
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dark-green);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+  }
+
+  .lede {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 56ch;
+    margin: 0;
+  }
+  .lede strong { color: var(--charcoal); font-weight: 600; }
+
+  /* ---------- Sections ---------- */
+  .section {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 26px;
+    margin-top: 22px;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 4px;
+  }
+  .snum {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    background: var(--charcoal);
+    color: var(--acid-green);
+    font-weight: 800;
+    font-size: 14px;
+    border-radius: 8px;
+  }
+  .section-head h2 {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .section-note {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 6px 0 20px;
+  }
+
+  fieldset {
+    border: 0;
+    margin: 0 0 22px;
+    padding: 0;
+  }
+  fieldset:last-child { margin-bottom: 0; }
+  legend {
+    padding: 0;
+    font-weight: 600;
+    font-size: 15.5px;
+    margin-bottom: 12px;
+  }
+  legend .q { color: var(--dark-green); font-weight: 700; margin-right: 6px; }
+
+  /* ---------- Choice rows (single-column radios / checkboxes) ---------- */
+  .choices { display: grid; gap: 8px; }
+
+  .choice {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color .12s ease, background-color .12s ease;
+  }
+  .choice:hover { border-color: #c2c8c8; background: #fafbfb; }
+  .choice input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+  .dot {
+    flex: none;
+    width: 20px; height: 20px;
+    border: 2px solid #b9c0c0;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    transition: border-color .12s ease;
+  }
+  .dot::after {
+    content: "";
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--dark-green);
+    transform: scale(0);
+    transition: transform .12s ease;
+  }
+  .box { border-radius: 6px; }
+  .box::after { border-radius: 3px; }
+
+  .choice input:checked ~ .dot { border-color: var(--dark-green); }
+  .choice input:checked ~ .dot::after { transform: scale(1); }
+  .choice:has(input:checked) {
+    border-color: var(--dark-green);
+    background: rgba(9,126,116,0.05);
+  }
+  .choice input:focus-visible ~ .dot {
+    outline: 3px solid var(--acid-green);
+    outline-offset: 2px;
+  }
+  .choice .label { font-size: 15px; }
+
+  /* ---------- Rating scale (Before / Now) ---------- */
+  .scale-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    padding: 10px 14px;
+    background: var(--antiflash-white);
+    border-radius: 8px;
+  }
+  .scale-legend b { color: var(--charcoal); font-weight: 700; }
+
+  .skill {
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+  }
+  .skill:first-of-type { border-top: 0; padding-top: 4px; }
+  .skill-name {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+  .skill-name span { color: var(--muted); font-weight: 400; }
+
+  .rating-row {
+    display: grid;
+    grid-template-columns: 58px 1fr;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .rating-row:last-child { margin-bottom: 0; }
+  .rating-tag {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+
+  .segments { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .seg { position: relative; }
+  .seg input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .seg label {
+    display: block;
+    text-align: center;
+    padding: 9px 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--charcoal);
+    cursor: pointer;
+    transition: all .12s ease;
+    user-select: none;
+  }
+  .seg label:hover { border-color: #c2c8c8; background: #fafbfb; }
+  /* "Now" answers use the institute green; "Before" uses charcoal */
+  .row-now input:checked + label {
+    background: var(--dark-green);
+    border-color: var(--dark-green);
+    color: #fff;
+  }
+  .row-before input:checked + label {
+    background: var(--charcoal);
+    border-color: var(--charcoal);
+    color: #fff;
+  }
+  .seg input:focus-visible + label {
+    outline: 3px solid var(--acid-green);
+    outline-offset: 2px;
+  }
+
+  /* ---------- Textareas / inputs ---------- */
+  .field { margin-bottom: 20px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label.flabel {
+    display: block;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  .field .hint { color: var(--muted); font-weight: 400; font-size: 13.5px; }
+  textarea, input[type="email"] {
+    width: 100%;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--charcoal);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    transition: border-color .12s ease, box-shadow .12s ease;
+  }
+  textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
+  textarea:focus, input[type="email"]:focus {
+    outline: none;
+    border-color: var(--dark-green);
+    box-shadow: 0 0 0 3px rgba(9,126,116,0.15);
+  }
+
+  /* ---------- Submit ---------- */
+  .actions {
+    margin-top: 26px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  button[type="submit"] {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--dark-green);
+    border: 0;
+    border-radius: 10px;
+    padding: 14px 30px;
+    cursor: pointer;
+    transition: background-color .12s ease, transform .06s ease;
+  }
+  button[type="submit"]:hover { background: var(--dark-green-hover); }
+  button[type="submit"]:active { transform: translateY(1px); }
+  button[type="submit"]:focus-visible { outline: 3px solid var(--acid-green); outline-offset: 3px; }
+  button[type="submit"][disabled] { opacity: 0.6; cursor: progress; }
+
+  .status { font-size: 14px; font-weight: 500; }
+  .status.error { color: #b0341d; }
+
+  /* ---------- Success ---------- */
+  .thanks {
+    display: none;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-left: 6px solid var(--acid-green);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 40px 32px;
+    margin-top: 22px;
+  }
+  .thanks h2 { margin: 0 0 8px; font-size: 24px; font-weight: 800; letter-spacing: -0.01em; }
+  .thanks p { margin: 0; color: var(--muted); }
+  .check {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--dark-green); color: #fff;
+    display: grid; place-items: center;
+    font-size: 24px; margin-bottom: 18px;
+  }
+
+  .foot {
+    margin-top: 26px;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 540px) {
+    .section { padding: 22px 18px; }
+    .rating-row { grid-template-columns: 1fr; gap: 6px; }
+    .rating-tag { margin-bottom: 2px; }
+    .seg label { padding: 11px 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="topbar"></div>
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Quadram Institute Bioscience · Core Bioinformatics</p>
+    <h1>Metagenome Profiling Training — Feedback</h1>
+    <p class="lede">This takes about <strong>5 minutes</strong> and your answers are <strong>anonymous</strong>. There are no right answers — please be honest so we can improve the next run. Every question is optional.</p>
+  </header>
+
+  <form id="feedback-form" action="https://formspree.io/f/xdarjyrk" method="POST">
+    <input type="hidden" name="_subject" value="Metagenome Profiling Training — feedback response">
+    <!-- Honeypot: hidden from humans, catches bots -->
+    <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true">
+
+    <!-- ============ 1. ABOUT YOU ============ -->
+    <section class="section">
+      <div class="section-head"><span class="snum">1</span><h2>About you</h2></div>
+      <p class="section-note">This helps us read the rest of your answers by starting level — it won't identify you.</p>
+
+      <fieldset>
+        <legend>Which best described you at the <em>start</em> of the training?</legend>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="Starting level" value="New to both CLI and metagenomics"><span class="dot"></span><span class="label">New to both the Linux command line and metagenomics</span></label>
+          <label class="choice"><input type="radio" name="Starting level" value="Comfortable with R, new to CLI/metagenomics"><span class="dot"></span><span class="label">Comfortable with R, but new to the command line / metagenomics</span></label>
+          <label class="choice"><input type="radio" name="Starting level" value="Comfortable with CLI, new to metagenomics"><span class="dot"></span><span class="label">Comfortable with the Linux command line, but new to metagenomics</span></label>
+          <label class="choice"><input type="radio" name="Starting level" value="Some prior metagenomics experience"><span class="dot"></span><span class="label">Already had some metagenomics experience</span></label>
+        </div>
+      </fieldset>
+    </section>
+
+    <!-- ============ 2. SKILLS BEFORE / NOW ============ -->
+    <section class="section">
+      <div class="section-head"><span class="snum">2</span><h2>Your skills &amp; confidence</h2></div>
+      <p class="section-note">For each skill, rate your confidence <em>before</em> the training and <em>now</em>.</p>
+
+      <div class="scale-legend">
+        <span><b>1</b> not at all</span>
+        <span><b>2</b> slightly</span>
+        <span><b>3</b> somewhat</span>
+        <span><b>4</b> confident</span>
+        <span><b>5</b> could do it on my own</span>
+      </div>
+
+      <!-- Skill rows are generated below by a small template loop for readability -->
+      <div id="skills"></div>
+    </section>
+
+    <!-- ============ 3. THE TRAINING ============ -->
+    <section class="section">
+      <div class="section-head"><span class="snum">3</span><h2>The training itself</h2></div>
+
+      <fieldset>
+        <legend><span class="q">3.1</span>The pace was…</legend>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="Pace" value="Too slow"><span class="dot"></span><span class="label">Too slow</span></label>
+          <label class="choice"><input type="radio" name="Pace" value="A little slow"><span class="dot"></span><span class="label">A little slow</span></label>
+          <label class="choice"><input type="radio" name="Pace" value="About right"><span class="dot"></span><span class="label">About right</span></label>
+          <label class="choice"><input type="radio" name="Pace" value="A little fast"><span class="dot"></span><span class="label">A little fast</span></label>
+          <label class="choice"><input type="radio" name="Pace" value="Too fast"><span class="dot"></span><span class="label">Too fast</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="q">3.2</span>The balance of explanation vs. hands-on practice was…</legend>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="Explanation vs practice" value="Too much explanation, not enough practice"><span class="dot"></span><span class="label">Too much explanation, not enough practice</span></label>
+          <label class="choice"><input type="radio" name="Explanation vs practice" value="About right"><span class="dot"></span><span class="label">About right</span></label>
+          <label class="choice"><input type="radio" name="Explanation vs practice" value="Too much practice, not enough explanation"><span class="dot"></span><span class="label">Too much practice, not enough explanation</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="q">3.3</span>The level of the material was right for me.</legend>
+        <div class="choices" data-likert="Level was right for me"></div>
+      </fieldset>
+
+      <fieldset style="margin-bottom:0">
+        <legend><span class="q">3.4</span>The materials (slides, scripts, notes) are clear enough to reuse on my own.</legend>
+        <div class="choices" data-likert="Materials are reusable"></div>
+      </fieldset>
+    </section>
+
+    <!-- ============ 4. LOOKING AHEAD ============ -->
+    <section class="section">
+      <div class="section-head"><span class="snum">4</span><h2>Looking ahead</h2></div>
+
+      <fieldset>
+        <legend><span class="q">4.1</span>I feel ready to start analysing metagenomics data from the command line myself.</legend>
+        <div class="choices" data-likert="Ready to analyse on my own"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="q">4.2</span>Do you have data of your own to apply this to?</legend>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="Own data" value="Yes, soon"><span class="dot"></span><span class="label">Yes, soon</span></label>
+          <label class="choice"><input type="radio" name="Own data" value="Maybe, later"><span class="dot"></span><span class="label">Maybe, later</span></label>
+          <label class="choice"><input type="radio" name="Own data" value="Not currently"><span class="dot"></span><span class="label">Not currently</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset style="margin-bottom:0">
+        <legend><span class="q">4.3</span>What would most help you keep going? <span style="font-weight:400;color:var(--muted)">(tick all that apply)</span></legend>
+        <div class="choices">
+          <label class="choice"><input type="checkbox" name="What would help[]" value="A follow-up / advanced session"><span class="dot box"></span><span class="label">A follow-up / advanced session</span></label>
+          <label class="choice"><input type="checkbox" name="What would help[]" value="Written reference walkthroughs"><span class="dot box"></span><span class="label">Written reference walkthroughs</span></label>
+          <label class="choice"><input type="checkbox" name="What would help[]" value="Drop-in help / office hours"><span class="dot box"></span><span class="label">Drop-in help / office hours</span></label>
+          <label class="choice"><input type="checkbox" name="What would help[]" value="A reusable example dataset and script"><span class="dot box"></span><span class="label">A reusable example dataset and script</span></label>
+          <label class="choice"><input type="checkbox" name="What would help[]" value="Nothing specific right now"><span class="dot box"></span><span class="label">Nothing specific right now</span></label>
+        </div>
+      </fieldset>
+    </section>
+
+    <!-- ============ 5. OPEN COMMENTS ============ -->
+    <section class="section">
+      <div class="section-head"><span class="snum">5</span><h2>In your own words</h2></div>
+
+      <div class="field">
+        <label class="flabel" for="useful">What was the <em>most useful</em> part of the training?</label>
+        <textarea id="useful" name="Most useful part"></textarea>
+      </div>
+      <div class="field">
+        <label class="flabel" for="confusing">Was anything <em>confusing, rushed, or missing</em>?</label>
+        <textarea id="confusing" name="Confusing, rushed or missing"></textarea>
+      </div>
+      <div class="field">
+        <label class="flabel" for="anything">Anything else you'd like us to know?</label>
+        <textarea id="anything" name="Anything else"></textarea>
+      </div>
+      <div class="field">
+        <label class="flabel" for="email">Email <span class="hint">— optional, only if you'd like a reply or to hear about follow-ups. Leaving it blank keeps your response anonymous.</span></label>
+        <input type="email" id="email" name="email" placeholder="you@quadram.ac.uk">
+      </div>
+    </section>
+
+    <div class="actions">
+      <button type="submit" id="submit-btn">Send feedback</button>
+      <span class="status" id="status" role="status" aria-live="polite"></span>
+    </div>
+  </form>
+
+  <!-- Success replaces the form -->
+  <div class="thanks" id="thanks">
+    <div class="check" aria-hidden="true">✓</div>
+    <h2>Thank you</h2>
+    <p>Your feedback has been recorded. It genuinely shapes how we run the next session.</p>
+  </div>
+
+  <p class="foot">Quadram Institute Bioscience · Core Bioinformatics training feedback</p>
+</div>
+
+<script>
+  // --- Build the repetitive markup (skills grid + Likert rows) once, cleanly ---
+  const scale = ["1", "2", "3", "4", "5"];
+
+  const skills = [
+    ["Linux CLI", "Working in the Linux command line (navigating, running commands, editing files)"],
+    ["QC & trimming", "Quality control and read trimming, and reading QC reports (fastp, MultiQC)"],
+    ["Host removal", "Removing host reads from samples"],
+    ["Taxonomic profiling", "Taxonomic profiling with MetaPhlAn and Kraken2"],
+    ["Workflow", "Understanding the overall shotgun workflow and how each step connects"],
+    ["Limitations", "Recognising the limitations and caveats of these tools and their results"],
+    ["Into R / scripts", "Bringing profiles into R / scripts for downstream analysis"],
+  ];
+
+  function segRow(rowClass, groupName, tag) {
+    const segs = scale.map(v => {
+      const id = groupName.replace(/[^a-z0-9]+/gi, "-") + "-" + rowClass + "-" + v;
+      return `<div class="seg">
+        <input type="radio" id="${id}" name="${groupName} (${tag.toLowerCase()})" value="${v}">
+        <label for="${id}">${v}</label>
+      </div>`;
+    }).join("");
+    return `<div class="rating-row ${rowClass}">
+      <span class="rating-tag">${tag}</span>
+      <div class="segments">${segs}</div>
+    </div>`;
+  }
+
+  document.getElementById("skills").innerHTML = skills.map(([short, full]) => `
+    <div class="skill">
+      <div class="skill-name">${full}</div>
+      ${segRow("row-before", short, "Before")}
+      ${segRow("row-now", short, "Now")}
+    </div>`).join("");
+
+  // Likert (5-point agree scale) blocks
+  const likert = ["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"];
+  document.querySelectorAll("[data-likert]").forEach(box => {
+    const name = box.getAttribute("data-likert");
+    box.innerHTML = likert.map(opt => `
+      <label class="choice">
+        <input type="radio" name="${name}" value="${opt}">
+        <span class="dot"></span><span class="label">${opt}</span>
+      </label>`).join("");
+  });
+
+  // --- Formspree AJAX submission (native fetch) ---
+  const form = document.getElementById("feedback-form");
+  const btn = document.getElementById("submit-btn");
+  const status = document.getElementById("status");
+  const thanks = document.getElementById("thanks");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    status.className = "status";
+    status.textContent = "";
+    btn.disabled = true;
+    btn.textContent = "Sending…";
+
+    try {
+      const res = await fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { "Accept": "application/json" },
+      });
+
+      if (res.ok) {
+        form.style.display = "none";
+        thanks.style.display = "block";
+        thanks.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        const msg = data.errors ? data.errors.map(x => x.message).join(", ")
+                                : "Something went wrong — please try again.";
+        status.className = "status error";
+        status.textContent = msg;
+        btn.disabled = false;
+        btn.textContent = "Send feedback";
+      }
+    } catch (err) {
+      status.className = "status error";
+      status.textContent = "Network error — check your connection and try again.";
+      btn.disabled = false;
+      btn.textContent = "Send feedback";
+    }
+  });
+</script>
+</body>
+</html>
