@@ -12,6 +12,4 @@ The site covers taxonomic and functional profiling of metagenomic data using:
 
 The site renders at: http://corebio.info/metagenomics-profiling-workshop/
 
-## Built with
-
-[MkDocs](https://www.mkdocs.org/) with the Material theme.
+ 
