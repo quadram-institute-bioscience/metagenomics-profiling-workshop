@@ -17,7 +17,7 @@ title: "MetaPhlAn4 hands-on"
 MetaPhlAn4 requires a pre-built database of marker genes. For this workshop, the database is located at:
 
 ```bash
-/shared/team/conda/telatin.cli-giba-2026/mpa/lib/python3.13/site-packages/metaphlan/metaphlan_databases
+MPA_DB="/shared/team/conda/telatin.cli-giba-2026/mpa/lib/python3.13/site-packages/metaphlan/metaphlan_databases"
 ```
 
 **Key files in the database:**
@@ -27,7 +27,7 @@ MetaPhlAn4 requires a pre-built database of marker genes. For this workshop, the
 
 **To explore:**
 ```bash
-ls -lh /shared/team/conda/telatin.cli-giba-2026/mpa/lib/python3.13/site-packages/metaphlan/metaphlan_databases
+ls -lh $MPA_DB
 ```
 
 ## Part 2: Running MetaPhlAn4
@@ -77,7 +77,7 @@ metaphlan [FORWARD],[REVERSE] \
 You can test this command on a small subset of reads:
 
 ```bash
-metaphlan $WSUSER/small_subset/subset_R1.fq.gz,$WSUSER/small_subset/subset_R2.fq.gz \
+metaphlan $SUBSET/subset_R1.fq.gz,$SUBSET/subset_R2.fq.gz \
     --input_type fastq \
     --offline \
     --nproc 6 \
